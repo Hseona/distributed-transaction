@@ -1,6 +1,9 @@
 package org.seona.monolithic.order.controller;
 
 import org.seona.monolithic.order.application.OrderService;
+import org.seona.monolithic.order.application.dto.CreateOrderResult;
+import org.seona.monolithic.order.controller.dto.CreateOrderRequest;
+import org.seona.monolithic.order.controller.dto.CreateOrderResponse;
 import org.seona.monolithic.order.controller.dto.PlaceOrderRequest;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +20,11 @@ public class OrderController {
     @PostMapping("/order/place")
     public void placeOrder(@RequestBody PlaceOrderRequest request) throws InterruptedException {
         orderService.placeOrder(request.toPlaceOrderCommand());
+    }
 
-        Thread.sleep(3000);
+    @PostMapping("/order")
+    public CreateOrderResponse createOrder(@RequestBody CreateOrderRequest request) {
+        CreateOrderResult result = orderService.createOrder(request.toCreateOrderCommand());
+        return new CreateOrderResponse(result.orderId());
     }
 }
