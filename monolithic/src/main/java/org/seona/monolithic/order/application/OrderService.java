@@ -47,25 +47,20 @@ public class OrderService {
         Order order = orderRepository.findById(command.orderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        // 이미 주문된 주문일 경우 수행하지 않고 바로 리턴 처리함
         if (order.getStatus() == Order.OrderStatus.COMPLETED) {
             return;
         }
 
         Long totalPrice = 0L;
-        // 완료되지 않은 경우 orderId를 이용해서 주문상품정보를 가져옴
         List<OrderItem> orderItems = orderItemRepository.findAllByOrderId(order.getId());
 
-        // 가져온 주문상품 정보 기반으로 재고 차감
         for (OrderItem item : orderItems) {
             Long price = productService.buy(item.getProductId(), item.getQuantity());
             totalPrice += price;
         }
 
         pointService.use(1L, totalPrice);
-
         order.complete();
-        orderRepository.save(order);
 
         System.out.println("결제 완료");
         Thread.sleep(3000);
