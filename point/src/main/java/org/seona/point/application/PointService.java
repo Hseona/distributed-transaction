@@ -1,5 +1,6 @@
 package org.seona.point.application;
 
+import org.seona.point.application.dto.PointUseCancelCommand;
 import org.seona.point.application.dto.PointUseCommand;
 import org.seona.point.domain.Point;
 import org.seona.point.domain.PointTransactionHistory;
@@ -38,5 +39,28 @@ public class PointService {
                 point.getId(),
                 command.amount(),
                 PointTransactionHistory.TransactionType.USE));
+    }
+
+    @Transactional
+    public void cancel(PointUseCancelCommand command) {
+        PointTransactionHistory history = pointTransactionHistoryRepository.findByRequestIdAndTransactionType(command.requestId(), PointTransactionHistory.TransactionType.USE);
+        if (history == null) {
+            throw new RuntimeException("포인트 사용 이력이 없습니다.");
+        }
+
+        PointTransactionHistory cancelHistory = pointTransactionHistoryRepository.findByRequestIdAndTransactionType(command.requestId(), PointTransactionHistory.TransactionType.CANCEL);
+        if (cancelHistory != null) {
+            System.out.println("이미 취소된 요청입니다.");
+            return;
+        }
+
+        Point point = pointRepository.findById(history.getPointId()).orElseThrow();
+        point.cancel(history.getAmount());
+        pointTransactionHistoryRepository.save(new PointTransactionHistory(
+                command.requestId(),
+                point.getId(),
+                history.getAmount(),
+                PointTransactionHistory.TransactionType.CANCEL
+        ));
     }
 }

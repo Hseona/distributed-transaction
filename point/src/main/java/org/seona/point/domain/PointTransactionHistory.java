@@ -28,4 +28,12 @@ public class PointTransactionHistory {
     public enum TransactionType {
         USE, CANCEL
     }
+
+    public Long getPointId() {
+        return pointId;
+    }
+
+    public Long getAmount() {
+        return amount;
+    }
 }
