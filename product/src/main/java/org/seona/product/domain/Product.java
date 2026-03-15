@@ -12,6 +12,9 @@ public class Product {
     private Long quantity;
     private Long price;
 
+    @Version
+    private Long version;
+
     public Product() {}
 
     public Product(Long quantity, Long price) {
@@ -19,7 +22,7 @@ public class Product {
         this.price = price;
     }
 
-    public Long calculatePrice() {
+    public Long calculatePrice(Long quantity) {
         return quantity * price;
     }
 
