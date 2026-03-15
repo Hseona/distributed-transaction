@@ -33,4 +33,9 @@ public class Product {
 
         this.quantity = this.quantity - quantity;
     }
+
+    // 취소할 때 상품 재고 늘리기
+    public void cancel(Long quantity) {
+        this.quantity = this.quantity + quantity;
+    }
 }

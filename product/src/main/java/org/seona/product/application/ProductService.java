@@ -1,5 +1,7 @@
 package org.seona.product.application;
 
+import org.seona.product.application.dto.ProductBuyCancelCommand;
+import org.seona.product.application.dto.ProductBuyCancelResult;
 import org.seona.product.application.dto.ProductBuyCommand;
 import org.seona.product.application.dto.ProductBuyResult;
 import org.seona.product.domain.Product;
@@ -54,5 +56,46 @@ public class ProductService {
         productTransactionHistoryRepository.saveAll(newHistories);
 
         return new ProductBuyResult(totalPrice);
+    }
+
+    @Transactional
+    public ProductBuyCancelResult cancel(ProductBuyCancelCommand command) {
+        List<ProductTransactionHistory> buyHistories = productTransactionHistoryRepository.findAllByRequestIdAndTransactionType(command.requestId(), ProductTransactionHistory.TransactionType.PURCHASE);
+
+        if (buyHistories.isEmpty()) {
+            throw new RuntimeException("구매 이력이 존재하지 않습니다.");
+        }
+
+        List<ProductTransactionHistory> cancelHistories = productTransactionHistoryRepository.findAllByRequestIdAndTransactionType(command.requestId(), ProductTransactionHistory.TransactionType.CANCEL);
+        if (!cancelHistories.isEmpty()) {
+            System.out.println("이미 취소되었습니다.");
+            Long totalPrice = cancelHistories.stream()
+                    .mapToLong(ProductTransactionHistory::getPrice)
+                    .sum();
+
+            return new ProductBuyCancelResult(totalPrice);
+        }
+
+        Long totalPrice = 0L;
+
+        // 취소 이력이 없다면 취소를 진행하고 총 구매금액 반환
+        for (ProductTransactionHistory history : buyHistories) {
+            Product product = productRepository.findById(history.getProductId()).orElseThrow(() -> new RuntimeException("Product not found"));
+
+            product.cancel(history.getQuantity());
+            totalPrice += history.getPrice();
+
+            productTransactionHistoryRepository.save(
+                    new ProductTransactionHistory(
+                            command.requestId(),
+                            history.getProductId(),
+                            history.getQuantity(),
+                            history.getPrice(),
+                            ProductTransactionHistory.TransactionType.CANCEL
+                    )
+            );
+        }
+
+        return new ProductBuyCancelResult(totalPrice);
     }
 }

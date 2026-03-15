@@ -42,4 +42,16 @@ public class ProductTransactionHistory {
     public TransactionType getTransactionType() {
         return transactionType;
     }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public Long getQuantity() {
+        return quantity;
+    }
 }
