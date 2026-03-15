@@ -14,6 +14,10 @@ public class Point {
 
     private Long amount;
 
+    // 동시성 문제를 방어하기 위한 버전 컬럼
+    @Version
+    private Long version;
+
     public Point() {}
 
     public Point(Long userId, Long amount) {
@@ -27,5 +31,9 @@ public class Point {
         }
 
         this.amount = this.amount - amount;
+    }
+
+    public Long getId() {
+        return id;
     }
 }
