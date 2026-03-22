@@ -12,6 +12,9 @@ public class Product {
     private Long quantity;
     private Long price;
 
+    @Version
+    private Long version;
+
     public Product() {}
 
     public Product(Long quantity, Long price) {
@@ -19,7 +22,7 @@ public class Product {
         this.price = price;
     }
 
-    public Long calculatePrice() {
+    public Long calculatePrice(Long quantity) {
         return quantity * price;
     }
 
@@ -29,5 +32,10 @@ public class Product {
         }
 
         this.quantity = this.quantity - quantity;
+    }
+
+    // 취소할 때 상품 재고 늘리기
+    public void cancel(Long quantity) {
+        this.quantity = this.quantity + quantity;
     }
 }
