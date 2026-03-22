@@ -19,7 +19,7 @@ public class PointApiClient {
     public void use(PointUseApiRequest request) {
         restClient
                 .post()
-                .uri("point/use")
+                .uri("/point/use")
                 .retrieve()
                 .toBodilessEntity();
     }
@@ -29,7 +29,7 @@ public class PointApiClient {
             maxAttempts = 3,
             backoff = @Backoff(delay = 500)
     )
-    public void cancel(PointUseApiRequest request) {
+    public void cancel(PointUseCancelApiRequest request) {
         restClient
                 .post()
                 .uri("/point/use/cancel")
