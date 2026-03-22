@@ -20,6 +20,7 @@ public class PointApiClient {
         restClient
                 .post()
                 .uri("/point/use")
+                .body(request)
                 .retrieve()
                 .toBodilessEntity();
     }
