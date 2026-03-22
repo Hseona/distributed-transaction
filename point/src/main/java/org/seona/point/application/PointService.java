@@ -39,8 +39,6 @@ public class PointService {
                 point.getId(),
                 command.amount(),
                 PointTransactionHistory.TransactionType.USE));
-
-        throw new RuntimeException("강제 오류 발생");
     }
 
     @Transactional
