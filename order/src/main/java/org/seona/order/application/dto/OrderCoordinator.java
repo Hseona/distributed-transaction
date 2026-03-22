@@ -60,6 +60,8 @@ public class OrderCoordinator {
 
             // 3. order 상태 fail로 변경
             orderService.fail(command.orderId());
+
+            throw e;
         }
     }
 }
