@@ -1,6 +1,8 @@
 package org.seona.order.application.dto;
 
 import org.seona.order.application.OrderService;
+import org.seona.order.domain.CompensationRegistry;
+import org.seona.order.infrastructure.CompensationRegistryRepository;
 import org.seona.order.infrastructure.point.PointApiClient;
 import org.seona.order.infrastructure.point.PointUseApiRequest;
 import org.seona.order.infrastructure.point.PointUseCancelApiRequest;
@@ -12,11 +14,13 @@ public class OrderCoordinator {
     private final OrderService orderService;
     private final ProductApiClient productApiClient;
     private final PointApiClient pointApiClient;
+    private final CompensationRegistryRepository compensationRegistryRepository;
 
-    public OrderCoordinator(OrderService orderService, ProductApiClient productApiClient, PointApiClient pointApiClient) {
+    public OrderCoordinator(OrderService orderService, ProductApiClient productApiClient, PointApiClient pointApiClient, CompensationRegistryRepository compensationRegistryRepository) {
         this.orderService = orderService;
         this.productApiClient = productApiClient;
         this.pointApiClient = pointApiClient;
+        this.compensationRegistryRepository = compensationRegistryRepository;
     }
 
     public void placeOrder(PlaceOrderCommand command) {
@@ -47,19 +51,29 @@ public class OrderCoordinator {
             // 주문 완료
             orderService.complete(command.orderId());
         } catch (Exception e) {
+            rollback(command.orderId());
+            throw e;
+        }
+    }
+
+    public void rollback(Long orderId) {
+        try {
             // 주문 처리 중 오류 발생 시 보상 트랜잭션 로직 실행
             // 1. 재고 차감 취소
-            ProductBuyCancelApiRequest productBuyCancelApiRequest = new ProductBuyCancelApiRequest(command.orderId().toString());
+            ProductBuyCancelApiRequest productBuyCancelApiRequest = new ProductBuyCancelApiRequest( orderId.toString());
             ProductBuyCancelApiResponse productBuyCancelApiResponse = productApiClient.cancel(productBuyCancelApiRequest);
 
             // 2. 재고차감 결과의 금액이 0보다 클 경우에만 포인트 취소
             if (productBuyCancelApiResponse.totalPrice() > 0) {
-                PointUseCancelApiRequest pointUseCancelApiRequest = new PointUseCancelApiRequest(command.orderId().toString());
+                PointUseCancelApiRequest pointUseCancelApiRequest = new PointUseCancelApiRequest(orderId.toString());
                 pointApiClient.cancel(pointUseCancelApiRequest);
             }
 
             // 3. order 상태 fail로 변경
-            orderService.fail(command.orderId());
+            orderService.fail(orderId);
+        } catch (Exception e) {
+            compensationRegistryRepository.save(new CompensationRegistry(orderId));
+            throw e;
         }
     }
 }
