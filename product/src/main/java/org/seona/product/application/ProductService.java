@@ -63,7 +63,7 @@ public class ProductService {
         List<ProductTransactionHistory> buyHistories = productTransactionHistoryRepository.findAllByRequestIdAndTransactionType(command.requestId(), ProductTransactionHistory.TransactionType.PURCHASE);
 
         if (buyHistories.isEmpty()) {
-            throw new RuntimeException("구매 이력이 존재하지 않습니다.");
+            return new ProductBuyCancelResult(0L);
         }
 
         List<ProductTransactionHistory> cancelHistories = productTransactionHistoryRepository.findAllByRequestIdAndTransactionType(command.requestId(), ProductTransactionHistory.TransactionType.CANCEL);
@@ -96,6 +96,9 @@ public class ProductService {
             );
         }
 
+        if (true) {
+            throw new RuntimeException("강제 예외 발생");
+        }
         return new ProductBuyCancelResult(totalPrice);
     }
 }

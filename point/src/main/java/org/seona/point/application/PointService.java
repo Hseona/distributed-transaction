@@ -39,13 +39,15 @@ public class PointService {
                 point.getId(),
                 command.amount(),
                 PointTransactionHistory.TransactionType.USE));
+
+        throw new RuntimeException("강제 오류 발생");
     }
 
     @Transactional
     public void cancel(PointUseCancelCommand command) {
         PointTransactionHistory history = pointTransactionHistoryRepository.findByRequestIdAndTransactionType(command.requestId(), PointTransactionHistory.TransactionType.USE);
         if (history == null) {
-            throw new RuntimeException("포인트 사용 이력이 없습니다.");
+            return;
         }
 
         PointTransactionHistory cancelHistory = pointTransactionHistoryRepository.findByRequestIdAndTransactionType(command.requestId(), PointTransactionHistory.TransactionType.CANCEL);

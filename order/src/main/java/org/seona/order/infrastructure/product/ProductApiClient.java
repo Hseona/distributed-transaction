@@ -34,10 +34,10 @@ public class ProductApiClient {
             maxAttempts = 3,
             backoff = @Backoff(delay = 500)
     )
-    public ProductBuyCancelApiResponse cancel(ProductBuyApiRequest request) {
+    public ProductBuyCancelApiResponse cancel(ProductBuyCancelApiRequest request) {
         return restClient
                 .post()
-                .uri("product/buy/cancel")
+                .uri("/product/buy/cancel")
                 .body(request)
                 .retrieve()
                 .body(ProductBuyCancelApiResponse.class);

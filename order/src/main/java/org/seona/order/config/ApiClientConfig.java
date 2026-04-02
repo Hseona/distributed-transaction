@@ -14,7 +14,7 @@ public class ApiClientConfig {
     public ProductApiClient productApiClient() {
         return new ProductApiClient(
                 RestClient.builder()
-                        .baseUrl("http://localhost:8080")
+                        .baseUrl("http://localhost:8082")
                         .build()
         );
     }
